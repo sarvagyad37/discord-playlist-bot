@@ -23,11 +23,9 @@ async def on_message(message):
         l=11
         text_scraper = []
         async for msg in message.channel.history(limit=l):
-            text_scraper.append([msg.content, msg.created_at, msg.author.name])  #max(datetime.datetime) for newest
+            text_scraper.append([msg.content, msg.author.name])  #max(datetime.datetime) for newest
         #print(text_scraper)
         #print(" ")
-        text_scraper_rev=text_scraper[::-1]
-        #print(text_scraper_rev)
 
         for i in range(l):
           if re.match(r"^:thumbsup:",text_scraper[i][0]):
@@ -35,8 +33,10 @@ async def on_message(message):
             break
         #print(n)
         #print(text_scraper[n][1])
-        t1=text_scraper[n][1]
-        
+        #t1=text_scraper[n][1]
+        session1_text_scraper = text_scraper[:n]
+
+
 
 
 client.run(os.environ['TOKEN'])
