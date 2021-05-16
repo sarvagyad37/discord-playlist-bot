@@ -7,7 +7,6 @@ authors = ["sarvagya14503 <<>>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 discord = "^1.0.1"
-pandas = "^1.2.4"
 
 [tool.poetry.dev-dependencies]
 

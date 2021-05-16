@@ -24,15 +24,19 @@ async def on_message(message):
         text_scraper = []
         async for msg in message.channel.history(limit=l):
             text_scraper.append([msg.content, msg.created_at, msg.author.name])  #max(datetime.datetime) for newest
-            #if msg.content.lower() == match_re:
-        print(text_scraper)
-        print(" ")
+        #print(text_scraper)
+        #print(" ")
         text_scraper_rev=text_scraper[::-1]
-        print(text_scraper_rev)
+        #print(text_scraper_rev)
 
         for i in range(l):
-          #if text_scraper[i][0] == re.match(r"^:thumbsup: **Joined",text_scraper[i][0])
-
+          if re.match(r"^:thumbsup:",text_scraper[i][0]):
+            n=i
+            break
+        #print(n)
+        #print(text_scraper[n][1])
+        t1=text_scraper[n][1]
+        
 
 
 client.run(os.environ['TOKEN'])
