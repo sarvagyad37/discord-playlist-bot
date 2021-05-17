@@ -1,0 +1,77 @@
+#n[hello,world, how]
+
+#a[
+    ["$ppls", datetime.datetime(2021, 5, 16, 13, 54, 53, 914000), "vaggy"],
+    ["$ppls", datetime.datetime(2021, 5, 16, 13, 44, 20, 920000), "vaggy"],
+    ["", datetime.datetime(2021, 5, 16, 13, 44, 16, 611000), "Rythm"],
+    [
+        "<:youtube:335112740957978625> **Searching** 🔎 `love you zindagi`",
+        datetime.datetime(2021, 5, 16, 13, 44, 15, 902000),
+        "Rythm",
+    ],
+    [
+        "!p love you zindagi",
+        datetime.datetime(2021, 5, 16, 13, 44, 15, 811000),
+        "vaggy",
+    ],
+    [
+        "**Playing** 🎶 `hello world` - Now!",
+        datetime.datetime(2021, 5, 16, 13, 44, 7, 40000),
+        "Rythm",
+    ],
+    [
+        "<:youtube:335112740957978625> **Searching** 🔎 `hello world`",
+        datetime.datetime(2021, 5, 16, 13, 44, 6, 562000),
+        "Rythm",
+    ],
+    [
+        ":thumbsup: **Joined `General` and bound to <#507929394673745922>**",
+        datetime.datetime(2021, 5, 16, 13, 44, 6, 411000),
+        "Rythm",
+    ],
+    ["!p hello world", datetime.datetime(2021, 5, 16, 13, 44, 5, 696000), "vaggy"],
+    [
+        "📭 **Successfully disconnected**",
+        datetime.datetime(2021, 5, 16, 13, 44, 0, 321000),
+        "Rythm",
+    ],
+    ["!dc", datetime.datetime(2021, 5, 16, 13, 44, 0, 209000), "vaggy"],
+]
+
+#b[
+    ["!dc", datetime.datetime(2021, 5, 16, 13, 44, 0, 209000), "vaggy"],
+    [
+        "📭 **Successfully disconnected**",
+        datetime.datetime(2021, 5, 16, 13, 44, 0, 321000),
+        "Rythm",
+    ],
+    ["!p hello world", datetime.datetime(2021, 5, 16, 13, 44, 5, 696000), "vaggy"],
+    [
+        ":thumbsup: **Joined `General` and bound to <#507929394673745922>**",
+        datetime.datetime(2021, 5, 16, 13, 44, 6, 411000),
+        "Rythm",
+    ],
+    [
+        "<:youtube:335112740957978625> **Searching** 🔎 `hello world`",
+        datetime.datetime(2021, 5, 16, 13, 44, 6, 562000),
+        "Rythm",
+    ],
+    [
+        "**Playing** 🎶 `hello world` - Now!",
+        datetime.datetime(2021, 5, 16, 13, 44, 7, 40000),
+        "Rythm",
+    ],
+    [
+        "!p love you zindagi",
+        datetime.datetime(2021, 5, 16, 13, 44, 15, 811000),
+        "vaggy",
+    ],
+    [
+        "<:youtube:335112740957978625> **Searching** 🔎 `love you zindagi`",
+        datetime.datetime(2021, 5, 16, 13, 44, 15, 902000),
+        "Rythm",
+    ],
+    ["", datetime.datetime(2021, 5, 16, 13, 44, 16, 611000), "Rythm"],
+    ["$ppls", datetime.datetime(2021, 5, 16, 13, 44, 20, 920000), "vaggy"],
+    ["$ppls", datetime.datetime(2021, 5, 16, 13, 54, 53, 914000), "vaggy"],
+]
