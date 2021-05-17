@@ -23,8 +23,9 @@ async def on_message(message):
         text_scraper = []
         embedlist=[]
         rawlinks=[]
+        #urls=[]
         async for msg in message.channel.history(limit=l):
-            if msg.author.name=="Rythm":
+            if (msg.author.name)=="Rythm":
               text_scraper.append([msg.content, msg.created_at])  
         #print(text_scraper)
         #print(" ")
@@ -43,20 +44,25 @@ async def on_message(message):
             embedlist.append(msg.embeds)
         #print(embedlist)
         file1 = open("playlist.txt","w+")
-        file2 = open("play_final.txt","w+")
+        #file2 = open("play_final.txt","w+")
         for i in range(len(embedlist)):
           temp=embedlist[i][0]
-          rawlinks.append(temp.description)
-        
-        file1.writelines(rawlinks)
-        raw_urls=[]
+          tempdesc=temp.description
+          tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
+          rawlinks.append(tempurl)
+        #print(rawlinks)
+        urls = list(map(''.join, rawlinks))
+        for i in range(len(urls)):
+          file1.write(urls[i])
+          file1.write('\n')
+        #file1.writelines(urls)
+        #raw_urls=[]
         file1.close()
-        file2.close()
+        file1 = open("playlist.txt","r")
+        f = discord.File(file1)
+        await message.channel.send(file=f)
+        file1.close()
         print("hogya")
-
-
-
-          
 
     if message.content.startswith('$pppls'):
       l=11
