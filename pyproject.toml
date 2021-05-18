@@ -1,12 +1,13 @@
 [tool.poetry]
-name = "repl_python3_discord-playlist-bot"
+name = "discord-playlist-bot"
 version = "0.1.0"
 description = ""
 authors = ["sarvagya14503 <<>>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-discord = "^1.0.1"
+"discord.py" = "^1.7.2"
+ytmusicapi = "^0.17.0"
 
 [tool.poetry.dev-dependencies]
 

@@ -1,7 +1,9 @@
 import os
 import discord
 import re
-from collections import OrderedDict
+from ytmusicapi import YTMusic
+#YTMusic.setup(filepath=headers_auth.json)
+ytmusic = YTMusic('headers_auth.json')
 
 client = discord.Client()
 
@@ -48,8 +50,11 @@ async def on_message(message):
         for i in range(len(embedlist)):
           temp=embedlist[i][0]
           tempdesc=temp.description
-          tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
-          rawlinks.append(tempurl)
+          if re.match("^\*", tempdesc):
+            tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
+            url_ID = re.sub("/(https?)?+(:\/\/?)?+(www.?)?+[a-zA-Z]+(.com|.be)+(\/)+(watch?)?+[(?)]?+(v=?|V=?)?|(&)+(.*)/", "",tempurl)
+            print(url_ID)
+            rawlinks.append(url_ID)
         #print(rawlinks)
         urls = list(map(''.join, rawlinks))
         for i in range(len(urls)):
