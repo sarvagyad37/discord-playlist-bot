@@ -5,6 +5,8 @@ import json
 import asyncio
 import requests
 from urllib.parse import urlencode
+import base64
+import datetime
 
 client = discord.Client()
 
@@ -19,23 +21,60 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    def SpotifyAuthAccessToken():
+      
+        s_client_creds = f"{s_client_id}:{s_client_secret}"
+        s_client_creds_b64 = base64.b64encode(s_client_creds.encode())
+        
+        s_token_headers = {
+          "Authorization" : f"Basic {s_client_creds_b64.decode()}"
+        }
+
+        s_token_url = "https://accounts.spotify.com/api/token"
+
+        s_token_data_refresh = {
+          "grant_type" : "refresh_token",
+          "refresh_token" : s_refresh_token
+        }
+
+        r = requests.post(s_token_url, data=s_token_data_refresh, headers = s_token_headers)
+        
+        if r.status_code in range(200, 299):
+            s_token_response_data = r.json()
+            #now = datetime.datetime.now()
+            #s_expires_in = s_token_response_data['expires_in'] #in seconds
+            #s_expires = now + datetime.timedelta(seconds = s_expires_in)
+            #s_did_expire = s_expires < now
+            return s_token_response_data['access_token']
+
+    def SpotifyPlaylistCreate():
+
+        endpoint = "https://api.spotify.com/v1/users/"
+
+        s_playlist_headers = {
+          "Authorization" : f"Bearer {s_access_token}",
+          "Content-Type" : "application/json"
+        }
+
     #msg = message.content
     if message.content.startswith('$ppls'):
         #main code
         l = 1000
-        s_scope = 'playlist-modify-public'
-        s_username = 'r4xa4j5m4mjpz14d0kz0v9gfz' #my playlist bot
+        s_scope = 'playlist-modify-private'
+        s_username = 'r4xa4j5m4mjpz14d0kz0v9gfz'  #my playlist bot
         s_description = "created by Playlist Bot#7808"
-        
-        s_client_id = os.environ['SPOTIPY_CLIENT_ID']
-        s_client_secret = os.environ['SPOTIPY_CLIENT_SECRET']
-        s_access_token = os.environ['SPOTIFY_ACCESS_TOKEN'] #Playlist Bot account
+
+        s_client_id = os.environ['SPOTIFY_CLIENT_ID']
+        s_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
+        s_refresh_token = os.environ['SPOTIFY_REFRESH_TOKEN']
+
+
 
         text_scraper = []
         embedlist = []
         rawlinks = []
-        rawnames=[]
-        songnames=[]
+        rawnames = []
+        songnames = []
 
         async for msg in message.channel.history(limit=l):
             text_scraper.append([msg.content, msg.created_at, msg.author.name])
@@ -53,16 +92,17 @@ async def on_message(message):
             if msg.embeds:  #MIND BLOWING TECHNIQUE TO CHECK EMPTY LIST
                 embedlist.append(msg.embeds)
         #print(embedlist)
+
         file1 = open("playlist.txt", "w+")
-        file2 = open("play_final.txt","w+")
+        file2 = open("play_final.txt", "w+")
 
         for i in range(len(embedlist)):
             temp = embedlist[i][0]
             tempdesc = temp.description
             if re.match("^\*", tempdesc):
                 #print(tempdesc)
-                tempname = re.findall('\[(.*?)\]',tempdesc)
-                tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+',tempdesc)
+                tempname = re.findall('\[(.*?)\]', tempdesc)
+                tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
                 #print(tempurl)
                 url = tempurl[0]
                 #print(url)
@@ -70,25 +110,32 @@ async def on_message(message):
                 videoId = parsed[1]
                 rawlinks.append(videoId)
                 rawnames.append(tempname)
-        
+
         pname_embed = discord.Embed(
-          title = "What should be the name of your playlist",
-          description = "This request will timeout after 1 min"
-        )
+            title="What should be the name of your playlist",
+            description="This request will timeout after 1 min"
+            )
         pname_embed_sent = await message.channel.send(embed=pname_embed)
 
         try:
-          pname_msg = await client.wait_for('message', timeout=60, check=lambda message: message.author == message.author)
-          
-          s_playlist_name = pname_msg.content
+            pname_msg = await client.wait_for(
+                'message',
+                timeout=60,
+                check=lambda message: message.author == message.author)
 
-          if pname_msg:
-            await message.channel.send("Your Playlist is being generated")
-            #spotifyObject.user_playlist_create(user=s_username,name=s_playlist_name, public=True,description=s_description)
-            
+            s_playlist_name = pname_msg.content
+
+            if pname_msg:
+                await message.channel.send("Your Playlist is being generated")
+                s_access_token = SpotifyAuthAccessToken()
+                #spotifyObject.user_playlist_create(user=s_username,name=s_playlist_name, public=True,description=s_description)
+
         except asyncio.TimeoutError:
-          await pname_embed_sent.delete()
-          await message.channel.send("Cancelling due to timeout", delete_after=10)
+            await pname_embed_sent.delete()
+            await message.channel.send("Cancelling due to timeout", delete_after=10)
+
+
+
 
 
         songnames = list(map(''.join, rawnames))
@@ -100,7 +147,7 @@ async def on_message(message):
         for i in range(len(urls)):
             file2.write(urls[i])
             file2.write('\n')
-  
+
         file1.close()
         file2.close()
         file1 = open("playlist.txt", "r")
@@ -126,4 +173,3 @@ async def on_message(message):
 
 
 client.run(os.environ['DISCORD_BOT_TOKEN'])
-
