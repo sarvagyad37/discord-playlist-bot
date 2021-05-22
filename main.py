@@ -41,40 +41,55 @@ async def on_message(message):
         
         if r.status_code in range(200, 299):
             s_token_response_data = r.json()
-            #now = datetime.datetime.now()
-            #s_expires_in = s_token_response_data['expires_in'] #in seconds
-            #s_expires = now + datetime.timedelta(seconds = s_expires_in)
-            #s_did_expire = s_expires < now
             return s_token_response_data['access_token']
 
     def SpotifyPlaylistCreate():
-
-        endpoint = "https://api.spotify.com/v1/users/"
+        endpoint = "https://api.spotify.com/v1/users/r4xa4j5m4mjpz14d0kz0v9gfz/playlists"
 
         s_playlist_headers = {
-          "Authorization" : f"Bearer {s_access_token}",
-          "Content-Type" : "application/json"
+            "Authorization" : f"Bearer {s_access_token}",
+            "Content-Type" : "application/json"
         }
+
+        s_playlist_data = {
+            "name" : s_playlist_name,
+            "public" : "false",
+            "description" : "TPWK :)"
+        }
+
+        r = requests.post(endpoint, json=s_playlist_data, headers=s_playlist_headers)
+        if r.status_code in range(200,299):
+            return r.json()['id']
+
+    def SpotifySearch(query):
+        endpoint="https://api.spotify.com/v1/search"
+        
+        s_search_headers = {
+            "Authorization" : f"Bearer {s_access_token}",
+            "Content-Type" : "application/json"
+        }
+
+        query_data = urlencode({"q": query, "type": "track", "limit": 1,})
+        lookup_url = f"{endpoint}?{query_data}"
+        r = requests.get(lookup_url, headers = s_search_headers)
+        if r.status_code in range(200,299):
+            return r.json()['tracks']['items'][0]['uri']
 
     #msg = message.content
     if message.content.startswith('$ppls'):
         #main code
         l = 1000
-        s_scope = 'playlist-modify-private'
-        s_username = 'r4xa4j5m4mjpz14d0kz0v9gfz'  #my playlist bot
-        s_description = "created by Playlist Bot#7808"
 
         s_client_id = os.environ['SPOTIFY_CLIENT_ID']
         s_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
         s_refresh_token = os.environ['SPOTIFY_REFRESH_TOKEN']
-
-
 
         text_scraper = []
         embedlist = []
         rawlinks = []
         rawnames = []
         songnames = []
+        s_uri=[]
 
         async for msg in message.channel.history(limit=l):
             text_scraper.append([msg.content, msg.created_at, msg.author.name])
@@ -101,9 +116,16 @@ async def on_message(message):
             tempdesc = temp.description
             if re.match("^\*", tempdesc):
                 #print(tempdesc)
-                tempname = re.findall('\[(.*?)\]', tempdesc)
+                tempname = re.findall('\[(.*?)\]', tempdesc) #list of one item
                 tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
+                try:
+                    s_tempuri = SpotifySearch(tempname[0])
+                    s_uri.append(s_tempuri)
+                except IndexError:
+                    pass
+                #word "lyrics" is BAD, doesnt show any search result in spotify with that word
                 #print(tempurl)
+                
                 url = tempurl[0]
                 #print(url)
                 parsed = url.split("=")
@@ -128,6 +150,8 @@ async def on_message(message):
             if pname_msg:
                 await message.channel.send("Your Playlist is being generated")
                 s_access_token = SpotifyAuthAccessToken()
+                s_playlist_id = SpotifyPlaylistCreate()
+
                 #spotifyObject.user_playlist_create(user=s_username,name=s_playlist_name, public=True,description=s_description)
 
         except asyncio.TimeoutError:
