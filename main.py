@@ -138,10 +138,12 @@ async def on_message(message):
             if re.match("^\*", tempdesc):
                 #print(tempdesc)
                 tempname = re.findall('\[(.*?)\]', tempdesc) #list of one item
-                #tempname = 
+                tempname = re.sub(r'\([^()]*\)', '', tempname[0])
+                tempname = re.sub(r'\[[^()]*\]', '', tempname)
+                tempname = re.sub(r'\[[^()]*', '', tempname)
                 tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
                 try:
-                    s_tempuri = SpotifySearch(tempname[0])
+                    s_tempuri = SpotifySearch(tempname)
                     s_rawuri.append(s_tempuri)
                 except IndexError:
                     pass
@@ -151,7 +153,10 @@ async def on_message(message):
                 url = tempurl[0]
                 #print(url)
                 parsed = url.split("=")
-                videoId = parsed[1]
+                try:
+                  videoId = parsed[1]
+                except IndexError:
+                  pass
                 rawlinks.append(videoId)
                 rawnames.append(tempname)
 
