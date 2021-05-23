@@ -1,12 +1,11 @@
 import os
 import discord
 import re
-import json
 import asyncio
 import requests
 from urllib.parse import urlencode
 import base64
-import datetime
+from keep_alive import keep_alive
 
 client = discord.Client()
 
@@ -43,7 +42,7 @@ async def on_message(message):
             s_token_response_data = r.json()
             return s_token_response_data['access_token']
 
-    def SpotifyPlaylistCreate():
+    def SpotifyPlaylistCreate(s_playlist_name):
         endpoint = "https://api.spotify.com/v1/users/r4xa4j5m4mjpz14d0kz0v9gfz/playlists"
 
         s_playlist_headers = {
@@ -75,10 +74,30 @@ async def on_message(message):
         if r.status_code in range(200,299):
             return r.json()['tracks']['items'][0]['uri']
 
+    def SpotifyPlaylistAdd(list_of_uris):
+
+        endpoint = f"https://api.spotify.com/v1/playlists/{s_playlist_id}/tracks"
+        
+        s_playlist_add_headers = {
+            "Authorization" : f"Bearer {s_access_token}",
+            "Content-Type" : "application/json"
+        }
+        s_playlist_add_data = {
+            "uris" : list_of_uris
+        }
+
+        r = requests.post(endpoint, json = s_playlist_add_data, headers = s_playlist_add_headers)
+        if r.status_code in range(200,299):
+          return 1
+        else:
+          return 0
+
+
     #msg = message.content
     if message.content.startswith('$ppls'):
         #main code
         l = 1000
+        uri_limit = 99
 
         s_client_id = os.environ['SPOTIFY_CLIENT_ID']
         s_client_secret = os.environ['SPOTIFY_CLIENT_SECRET']
@@ -89,7 +108,7 @@ async def on_message(message):
         rawlinks = []
         rawnames = []
         songnames = []
-        s_uri=[]
+        s_rawuri=[]
 
         async for msg in message.channel.history(limit=l):
             text_scraper.append([msg.content, msg.created_at, msg.author.name])
@@ -100,6 +119,7 @@ async def on_message(message):
             if (re.match(r"^:thumbsup:", text_scraper[i][0])) and (text_scraper[i][2] == "Rythm"):
                 n = i
                 break
+
         #print(n)
         t1 = text_scraper[n][1]
         print(t1)
@@ -110,6 +130,7 @@ async def on_message(message):
 
         file1 = open("playlist.txt", "w+")
         file2 = open("play_final.txt", "w+")
+        s_access_token = SpotifyAuthAccessToken()
 
         for i in range(len(embedlist)):
             temp = embedlist[i][0]
@@ -117,10 +138,11 @@ async def on_message(message):
             if re.match("^\*", tempdesc):
                 #print(tempdesc)
                 tempname = re.findall('\[(.*?)\]', tempdesc) #list of one item
+                #tempname = 
                 tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
                 try:
                     s_tempuri = SpotifySearch(tempname[0])
-                    s_uri.append(s_tempuri)
+                    s_rawuri.append(s_tempuri)
                 except IndexError:
                     pass
                 #word "lyrics" is BAD, doesnt show any search result in spotify with that word
@@ -149,18 +171,18 @@ async def on_message(message):
 
             if pname_msg:
                 await message.channel.send("Your Playlist is being generated")
-                s_access_token = SpotifyAuthAccessToken()
-                s_playlist_id = SpotifyPlaylistCreate()
+                
+                s_playlist_id = SpotifyPlaylistCreate(s_playlist_name)
+                s_uri = [s_rawuri[i:i + uri_limit] for i in range(0, len(s_rawuri), uri_limit)]
+                for j in range(len(s_uri)):
+                    SpotifyPlaylistAdd(s_uri[j])
+                s_playlist_link = f"http://open.spotify.com/user/r4xa4j5m4mjpz14d0kz0v9gfz/playlist/{s_playlist_id}"
 
-                #spotifyObject.user_playlist_create(user=s_username,name=s_playlist_name, public=True,description=s_description)
+                await message.channel.send(s_playlist_link)
 
         except asyncio.TimeoutError:
             await pname_embed_sent.delete()
             await message.channel.send("Cancelling due to timeout", delete_after=10)
-
-
-
-
 
         songnames = list(map(''.join, rawnames))
         for i in range(len(songnames)):
@@ -195,5 +217,5 @@ async def on_message(message):
     elif message.content.startswith('$plshelp '):
         await message.channel.send("sorry babe, i am still a work in progress")
 
-
+keep_alive()
 client.run(os.environ['DISCORD_BOT_TOKEN'])
