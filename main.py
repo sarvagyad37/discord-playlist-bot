@@ -91,7 +91,13 @@ async def on_message(message):
           return 1
         else:
           return 0
-
+        
+    def ReplaceBadKeywords(string):
+        string = re.sub(r'\([^()]*\)', '', string)
+        string = re.sub(r'\[[^()]*\]', '', string)
+        string = re.sub(r'\[[^()]*', '', string)
+        string = re.sub('Studio Sessions: ', '', string)
+        return string
 
     #msg = message.content
     if message.content.startswith('$ppls'):
@@ -119,7 +125,6 @@ async def on_message(message):
             if (re.match(r"^:thumbsup:", text_scraper[i][0])) and (text_scraper[i][2] == "Rythm"):
                 n = i
                 break
-
         #print(n)
         t1 = text_scraper[n][1]
         print(t1)
@@ -138,26 +143,26 @@ async def on_message(message):
             if re.match("^\*", tempdesc):
                 #print(tempdesc)
                 tempname = re.findall('\[(.*?)\]', tempdesc) #list of one item
-                tempname = re.sub(r'\([^()]*\)', '', tempname[0])
-                tempname = re.sub(r'\[[^()]*\]', '', tempname)
-                tempname = re.sub(r'\[[^()]*', '', tempname)
-                tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
+                #**[Lorde - Supercut (lyrics)](https://www.youtube.com/watch?v=xguIYNjYU1A)**
+                tempname = ReplaceBadKeywords(tempname[0])
+                #tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+', tempdesc)
                 try:
                     s_tempuri = SpotifySearch(tempname)
                     s_rawuri.append(s_tempuri)
                 except IndexError:
+                  
                     pass
                 #word "lyrics" is BAD, doesnt show any search result in spotify with that word
                 #print(tempurl)
                 
-                url = tempurl[0]
+                #url = tempurl[0]
                 #print(url)
-                parsed = url.split("=")
-                try:
-                  videoId = parsed[1]
-                except IndexError:
-                  pass
-                rawlinks.append(videoId)
+                #parsed = url.split("=")
+                #try:
+                #  videoId = parsed[1]
+                #except IndexError:
+                #  pass
+                #rawlinks.append(videoId)
                 rawnames.append(tempname)
 
         pname_embed = discord.Embed(
@@ -179,6 +184,9 @@ async def on_message(message):
                 
                 s_playlist_id = SpotifyPlaylistCreate(s_playlist_name)
                 s_uri = [s_rawuri[i:i + uri_limit] for i in range(0, len(s_rawuri), uri_limit)]
+                #list = [1,2,3,4,5,6,7,8,9,10]
+                #list2 = [[1,2,3],[4,5,6],[7,8,9],[10]]
+
                 for j in range(len(s_uri)):
                     SpotifyPlaylistAdd(s_uri[j])
                 s_playlist_link = f"http://open.spotify.com/user/r4xa4j5m4mjpz14d0kz0v9gfz/playlist/{s_playlist_id}"

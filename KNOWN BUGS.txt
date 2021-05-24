@@ -1,3 +1,3 @@
 keywords in title not being recognized in spotify API like "lyrics", "music video" etc
 Studio Sessions:
-CHECK IF WE CAN re.sub from a string
+CHECK IF WE CAN re.sub from a variable
