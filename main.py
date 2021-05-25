@@ -7,6 +7,7 @@ from spotifySelfAPI import SpotifyAuthAccessToken, SpotifySearch, SpotifyPlaylis
 from replaceBadKeywords import ReplaceBadKeywords
 from collections import OrderedDict
 from youtubeSelfAPI import YoutubePlaylistCreate, YoutubeSearch, YoutubePlaylistAdd
+from time import sleep
 
 client = discord.Client()
 
@@ -23,7 +24,7 @@ async def on_message(message):
     if message.content.startswith('$ppls'):
         print("chaliye shuru karte hai")
         #main code
-        l = 1000
+        l = 1500
         req_limit = 50
 
         s_client_id = os.environ['SPOTIFY_CLIENT_ID']
@@ -41,12 +42,18 @@ async def on_message(message):
         async for msg in message.channel.history(limit=l):
             text_scraper.append([msg.content, msg.created_at, msg.author.name])
 
-        for i in range(l):
-            if (re.match(r"^:thumbsup:", text_scraper[i][0])) and (text_scraper[i][2] == "Rythm"):
-                n = i
-                break
+        try:
+            for i in range(l):
+                if (re.match(r"^:thumbsup:", text_scraper[i][0])) and (text_scraper[i][2] == "Rythm"):
+                    n = i
+                    break
 
-        t1 = text_scraper[n][1]
+            t1 = text_scraper[n][1]
+
+        except UnboundLocalError:
+            raise Exception("init message before l=1000")
+            #l=l+250
+
         print(t1)
         async for msg in message.channel.history(limit=l, after=t1):
             if msg.embeds:  #MIND BLOWING TECHNIQUE TO CHECK EMPTY LIST
@@ -70,7 +77,7 @@ async def on_message(message):
                 timeout=60,
                 check=check)
 
-            s_platform_name = pplatform_msg.content
+            platform_name = pplatform_msg.content
 
             for i in range(len(embedlist)):
                 temp = embedlist[i][0]
@@ -88,9 +95,13 @@ async def on_message(message):
                         pass
 
                     tempname = re.findall('\[(.*?)\]', tempdesc) #list of one item
-                    tempname = ReplaceBadKeywords(tempname[0])
+                    try:
+                      tempname = ReplaceBadKeywords(tempname[0])
+                    except:
+                      pass
                     tempkv = [tempname, y_videoId]
                     name_id_pair.append(tempkv)
+            #print(len(name_id_pair))
 
             if pplatform_msg:
               pname_embed = discord.Embed(
@@ -107,31 +118,42 @@ async def on_message(message):
 
                   playlist_name = pname_msg.content
 
-                  if pname_msg:
-                      if s_platform_name == "y":
+                  if pname_msg:  
+                      if (platform_name == "y") or (platform_name == "youtube") :
                           y_playlist_id = YoutubePlaylistCreate(playlist_name)
                           y_rawvideoIds = [k[1] for k in name_id_pair]
+                          #print(len(y_rawvideoIds))
                           y_videoIds = [y_rawvideoIds[i:i + req_limit] for i in range(0, len(y_rawvideoIds), req_limit)]
+                          #print(len(y_videoIds))
 
                           await message.channel.send("Your Youtube Playlist is being generated")
 
+                          #k = YoutubePlaylistAdd(y_rawvideoIds, y_playlist_id)
+
+                          #print(k)
+
                           for j in range(len(y_videoIds)):
                               YoutubePlaylistAdd(y_videoIds[j], y_playlist_id)
+                          #    sleep(5)
+                          #    print(k)
+                              
                           y_playlist_link = f"https://music.youtube.com/playlist?list={y_playlist_id}"
 
                           await message.channel.send(y_playlist_link)            
 
-                      if s_platform_name == "s":
+                      if (platform_name == "s") or (platform_name == "spotify") :
                           for i in range(len(name_id_pair)):
                               try:
                                   s_tempuri = SpotifySearch(name_id_pair[i][0], s_access_token)
                                   s_temprawuri.append(s_tempuri)
                               except IndexError:
-                                  song_name = YoutubeSearch(name_id_pair[i][0])
-                                  s_tempuri = SpotifySearch(song_name, s_access_token)
-                                  s_temprawuri.append(s_tempuri)
-                              except:
-                                  print("idk somethings wrong but ok, video list:", name_id_pair[i])
+                                  try:
+                                      song_name = YoutubeSearch(name_id_pair[i][0])
+                                      s_tempuri = SpotifySearch(song_name, s_access_token)
+                                      s_temprawuri.append(s_tempuri)
+                                  except IndexError:
+                                      print("idk somethings wrong but ok, video list:", name_id_pair[i])
+                                  
                           
                           await message.channel.send("Your Spotify Playlist is being generated")
 
@@ -146,6 +168,8 @@ async def on_message(message):
                           s_playlist_link = f"http://open.spotify.com/user/r4xa4j5m4mjpz14d0kz0v9gfz/playlist/{s_playlist_id}"
 
                           await message.channel.send(s_playlist_link)
+                      #else:
+                        #await message.channel.send("you didnt enter a valid response, kindly run the bot again")
 
               except asyncio.TimeoutError:
                   await pname_embed_sent.delete()
