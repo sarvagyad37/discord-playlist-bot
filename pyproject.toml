@@ -8,6 +8,8 @@ authors = ["sarvagya14503 <<>>"]
 python = "^3.8"
 "discord.py" = "^1.7.2"
 flask = "1.1.4"
+ytmusicapi = "^0.17.3"
+youtube-dl = "^2021.5.16"
 
 [tool.poetry.dev-dependencies]
 
