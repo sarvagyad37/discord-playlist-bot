@@ -7,7 +7,7 @@ from spotifySelfAPI import SpotifyAuthAccessToken, SpotifySearch, SpotifyPlaylis
 from replaceBadKeywords import ReplaceBadKeywords
 from collections import OrderedDict
 from youtubeSelfAPI import YoutubePlaylistCreate, YoutubeSearch, YoutubePlaylistAdd
-from time import sleep
+import time
 
 client = discord.Client()
 
@@ -22,6 +22,7 @@ async def on_message(message):
         return
 
     if message.content.startswith('$ppls'):
+        start = time.time()
         print("chaliye shuru karte hai")
         #main code
         l = 1500
@@ -38,26 +39,30 @@ async def on_message(message):
         s_rawuri=[]
         s_temprawuri = []
         name_id_pair = []
+        tempembedlist = []
 
         async for msg in message.channel.history(limit=l):
-            text_scraper.append([msg.content, msg.created_at, msg.author.name])
+          if (msg.author.name == "Rythm"):
+            text_scraper.append([msg.content])
+            embedlist.append(msg.embeds)
 
         try:
             for i in range(l):
-                if (re.match(r"^:thumbsup:", text_scraper[i][0])) and (text_scraper[i][2] == "Rythm"):
+                if (re.match(r"^:thumbsup:", text_scraper[i][0])):
                     n = i
                     break
 
-            t1 = text_scraper[n][1]
+            #t1 = text_scraper[n][1]
+            #new_text_scraper = text_scraper[:n+1]
+            new_embedlist = embedlist[:n+1]
 
         except UnboundLocalError:
             raise Exception("init message before l=1000")
             #l=l+250
 
-        print(t1)
-        async for msg in message.channel.history(limit=l, after=t1):
-            if msg.embeds:  #MIND BLOWING TECHNIQUE TO CHECK EMPTY LIST
-                embedlist.append(msg.embeds)
+        for i in range(n):
+            if new_embedlist[i]: #MIND BLOWING TECHNIQUE TO CHECK EMPTY LIST
+              tempembedlist.append(new_embedlist[i])
 
         file1 = open("playlist.txt", "w+")
         s_access_token = SpotifyAuthAccessToken(s_client_id, s_client_secret, s_refresh_token)
@@ -79,8 +84,8 @@ async def on_message(message):
 
             platform_name = pplatform_msg.content
 
-            for i in range(len(embedlist)):
-                temp = embedlist[i][0]
+            for i in range(len(tempembedlist)):
+                temp = tempembedlist[i][0]
                 tempdesc = temp.description
                 if re.match("^\*", tempdesc):
                     tempurl = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+',tempdesc)
@@ -187,6 +192,9 @@ async def on_message(message):
         file1.close()
 
         print("hogya")
+        end = time.time()
+        print(f"Runtime of the program is {end - start}")
+
 
 KeepAlive()
 client.run(os.environ['DISCORD_BOT_TOKEN'])
