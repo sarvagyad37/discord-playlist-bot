@@ -25,7 +25,7 @@ async def on_message(message):
         start = time.time()
         print("chaliye shuru karte hai")
         #main code
-        l = 1500
+        l = 10000
         req_limit = 50
 
         s_client_id = os.environ['SPOTIFY_CLIENT_ID']
@@ -45,13 +45,17 @@ async def on_message(message):
           if (msg.author.name == "Rythm"):
             text_scraper.append([msg.content])
             embedlist.append(msg.embeds)
+            if (re.match(r"^:thumbsup:", msg.content)):
+              break
+
+        
 
         try:
-            for i in range(l):
-                if (re.match(r"^:thumbsup:", text_scraper[i][0])):
-                    n = i
-                    break
-
+            #for i in range(len(text_scraper)):
+             #   if (re.match(r"^:thumbsup:", text_scraper[i][0])):
+               #     n = i
+               #     break
+            n = len(text_scraper)
             #t1 = text_scraper[n][1]
             #new_text_scraper = text_scraper[:n+1]
             new_embedlist = embedlist[:n+1]
