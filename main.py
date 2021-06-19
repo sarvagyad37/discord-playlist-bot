@@ -15,7 +15,6 @@ client = discord.Client()
 async def on_ready():
     print("we have logged in as {0.user}".format(client))
 
-
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -24,8 +23,9 @@ async def on_message(message):
     if message.content.startswith('$ppls'):
         start = time.time()
         print("chaliye shuru karte hai")
+        
         #main code
-        l = 1500
+        l = 10000
         req_limit = 50
 
         s_client_id = os.environ['SPOTIFY_CLIENT_ID']
@@ -34,8 +34,6 @@ async def on_message(message):
 
         text_scraper = []
         embedlist = []
-        rawnames = []
-        songnames = []
         s_rawuri=[]
         s_temprawuri = []
         name_id_pair = []
@@ -45,26 +43,20 @@ async def on_message(message):
           if (msg.author.name == "Rythm"):
             text_scraper.append([msg.content])
             embedlist.append(msg.embeds)
+            if (re.match(r"^:thumbsup:", msg.content)):
+              break
 
         try:
-            for i in range(l):
-                if (re.match(r"^:thumbsup:", text_scraper[i][0])):
-                    n = i
-                    break
-
-            #t1 = text_scraper[n][1]
-            #new_text_scraper = text_scraper[:n+1]
+            n = len(text_scraper)
             new_embedlist = embedlist[:n+1]
 
         except UnboundLocalError:
-            raise Exception("init message before l=1000")
-            #l=l+250
+            raise Exception("init message before l=10000")
 
         for i in range(n):
             if new_embedlist[i]: #MIND BLOWING TECHNIQUE TO CHECK EMPTY LIST
               tempembedlist.append(new_embedlist[i])
 
-        file1 = open("playlist.txt", "w+")
         s_access_token = SpotifyAuthAccessToken(s_client_id, s_client_secret, s_refresh_token)
 
         pplatform_embed = discord.Embed(
@@ -106,7 +98,6 @@ async def on_message(message):
                       pass
                     tempkv = [tempname, y_videoId]
                     name_id_pair.append(tempkv)
-            #print(len(name_id_pair))
 
             if pplatform_msg:
               pname_embed = discord.Embed(
@@ -127,21 +118,13 @@ async def on_message(message):
                       if (platform_name == "y") or (platform_name == "youtube") :
                           y_playlist_id = YoutubePlaylistCreate(playlist_name)
                           y_rawvideoIds = [k[1] for k in name_id_pair]
-                          #print(len(y_rawvideoIds))
                           y_videoIds = [y_rawvideoIds[i:i + req_limit] for i in range(0, len(y_rawvideoIds), req_limit)]
-                          #print(len(y_videoIds))
 
                           await message.channel.send("Your Youtube Playlist is being generated")
 
-                          #k = YoutubePlaylistAdd(y_rawvideoIds, y_playlist_id)
-
-                          #print(k)
-
                           for j in range(len(y_videoIds)):
                               YoutubePlaylistAdd(y_videoIds[j], y_playlist_id)
-                          #    sleep(5)
-                          #    print(k)
-                              
+                        
                           y_playlist_link = f"https://music.youtube.com/playlist?list={y_playlist_id}"
 
                           await message.channel.send(y_playlist_link)            
@@ -163,9 +146,7 @@ async def on_message(message):
                           await message.channel.send("Your Spotify Playlist is being generated")
 
                           s_playlist_id = SpotifyPlaylistCreate(playlist_name, s_access_token)
-                          
                           s_rawuri = list(OrderedDict.fromkeys(s_temprawuri))
-
                           s_uri = [s_rawuri[i:i + req_limit] for i in range(0, len(s_rawuri), req_limit)]
 
                           for j in range(len(s_uri)):
@@ -173,8 +154,8 @@ async def on_message(message):
                           s_playlist_link = f"http://open.spotify.com/user/r4xa4j5m4mjpz14d0kz0v9gfz/playlist/{s_playlist_id}"
 
                           await message.channel.send(s_playlist_link)
-                      #else:
-                        #await message.channel.send("you didnt enter a valid response, kindly run the bot again")
+                      else:
+                        await message.channel.send("you didnt enter a valid response, kindly run the bot again")
 
               except asyncio.TimeoutError:
                   await pname_embed_sent.delete()
@@ -183,13 +164,6 @@ async def on_message(message):
         except asyncio.TimeoutError:
             await pplatform_embed_sent.delete()
             await message.channel.send("Cancelling due to timeout", delete_after=10)
-
-        songnames = list(map(''.join, rawnames))
-        for i in range(len(songnames)):
-            file1.write(songnames[i])
-            file1.write('\n')
-
-        file1.close()
 
         print("hogya")
         end = time.time()
